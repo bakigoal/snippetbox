@@ -28,7 +28,12 @@ func main() {
 	mux.HandleFunc("/snippet/create", app.snippetCreate)
 
 	app.infoLog.Printf("Starting server on %s", *addr)
-	err := http.ListenAndServe(*addr, mux)
+	srv := &http.Server{
+		Addr:     *addr,
+		ErrorLog: app.errorLog,
+		Handler:  mux,
+	}
+	err := srv.ListenAndServe()
 	app.errorLog.Fatal(err)
 }
 
