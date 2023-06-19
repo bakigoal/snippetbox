@@ -2,7 +2,7 @@ package main
 
 import "net/http"
 
-func routes(app *application) http.Handler {
+func (app *application) routes() http.Handler {
 	mux := http.NewServeMux()
 
 	fileServer := http.FileServer(http.Dir("./ui/static/"))

@@ -21,7 +21,7 @@ func main() {
 	srv := &http.Server{
 		Addr:     *addr,
 		ErrorLog: app.errorLog,
-		Handler:  routes(app),
+		Handler:  app.routes(),
 	}
 	err := srv.ListenAndServe()
 	app.errorLog.Fatal(err)
