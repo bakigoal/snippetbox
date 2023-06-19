@@ -33,13 +33,13 @@ VALUES ($1, $2, $3, $4)
 }
 
 func (m *SnippetModel) Get(id int) (*Snippet, error) {
-	stmt := `
-SELECT id, title, content, created, expires FROM snippetbox.snippets
-WHERE expires > now() AND id = ?
-`
-	row := m.DB.QueryRow(stmt, id)
 	s := &Snippet{}
-	err := row.Scan(&s.ID, &s.Title, &s.Content, &s.Created, &s.Expires)
+	stmt := `
+SELECT id, title, content, created, expires FROM snippetbox.snippets 
+WHERE expires > now() AND id = $1
+`
+	err := m.DB.QueryRow(stmt, id).Scan(&s.ID, &s.Title, &s.Content, &s.Created, &s.Expires)
+
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrNoRecord
