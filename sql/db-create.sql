@@ -1,5 +1,6 @@
--- auto-generated definition
-create table snippets
+create schema snippetbox;
+
+create table snippetbox.snippets
 (
     id      serial       not null
         constraint snippets_pkey
@@ -10,8 +11,8 @@ create table snippets
     expires timestamp    not null
 );
 
-alter table snippets
+alter table snippetbox.snippets
     owner to postgres;
 
 create index idx_snippets_created
-    on snippets (created);
+    on snippetbox.snippets (created);

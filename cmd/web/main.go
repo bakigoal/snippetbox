@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"github.com/bakigoal/snippetbox/internal/models"
 	_ "github.com/lib/pq"
 	"log"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 type application struct {
 	infoLog  *log.Logger
 	errorLog *log.Logger
+	snippets *models.SnippetModel
 }
 
 func main() {
@@ -20,22 +22,29 @@ func main() {
 	dsn := flag.String("dsn", defaultConn, "Postgres data source name")
 	flag.Parse()
 
-	app := createApplication()
+	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
 	db, err := openDB(*dsn)
 	if err != nil {
-		app.errorLog.Fatal(err)
+		errorLog.Fatal(err)
 	}
 	defer db.Close()
 
-	app.infoLog.Printf("Starting server on %s", *addr)
+	app := &application{
+		infoLog:  log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime),
+		errorLog: log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile),
+		snippets: &models.SnippetModel{DB: db},
+	}
+
+	infoLog.Printf("Starting server on %s", *addr)
 	srv := &http.Server{
 		Addr:     *addr,
-		ErrorLog: app.errorLog,
+		ErrorLog: errorLog,
 		Handler:  app.routes(),
 	}
 	err = srv.ListenAndServe()
-	app.errorLog.Fatal(err)
+	errorLog.Fatal(err)
 }
 
 func openDB(dsn string) (*sql.DB, error) {
@@ -47,11 +56,4 @@ func openDB(dsn string) (*sql.DB, error) {
 		return nil, err
 	}
 	return db, nil
-}
-
-func createApplication() *application {
-	return &application{
-		infoLog:  log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime),
-		errorLog: log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile),
-	}
 }
