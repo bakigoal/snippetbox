@@ -50,5 +50,32 @@ WHERE expires > now() AND id = $1
 }
 
 func (m *SnippetModel) Latest10() ([]*Snippet, error) {
-	return nil, nil
+	stmt := `
+SELECT id, title, content, created, expires FROM snippetbox.snippets 
+WHERE expires > now() ORDER BY id DESC LIMIT 10
+`
+	rows, err := m.DB.Query(stmt)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var snippets []*Snippet
+	for rows.Next() {
+		s := &Snippet{}
+		err = rows.Scan(&s.ID, &s.Title, &s.Content, &s.Created, &s.Expires)
+		if err != nil {
+			return nil, err
+		}
+		snippets = append(snippets, s)
+	}
+
+	// When the rows.Next() loop has finished we call rows.Err() to retrieve any
+	// error that was encountered during the iteration. It's important to
+	// call this - don't assume that a successful iteration was completed
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return snippets, nil
 }

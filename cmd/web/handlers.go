@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/bakigoal/snippetbox/internal/models"
 	"html/template"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -14,6 +15,15 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		app.notFound(w)
 		return
 	}
+	snippets, err := app.snippets.Latest10()
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+	for _, snippet := range snippets {
+		log.Println(snippet)
+	}
+
 	files := []string{
 		"./ui/html/base.tmpl.html",
 		"./ui/html/partials/nav.tmpl.html",
