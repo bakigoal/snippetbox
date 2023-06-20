@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/bakigoal/snippetbox/internal/models"
 	"html/template"
-	"log"
 	"net/http"
 	"strconv"
 )
@@ -19,9 +18,6 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, err)
 		return
 	}
-	for _, snippet := range snippets {
-		log.Println(snippet)
-	}
 
 	files := []string{
 		"./ui/html/base.tmpl.html",
@@ -34,7 +30,10 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, err)
 		return
 	}
-	err = ts.ExecuteTemplate(w, "base", nil)
+	data := &templateData{
+		Snippets: snippets,
+	}
+	err = ts.ExecuteTemplate(w, "base", data)
 	if err != nil {
 		app.serverError(w, err)
 	}
