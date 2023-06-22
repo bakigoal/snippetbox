@@ -5,15 +5,17 @@ import (
 	"flag"
 	"github.com/bakigoal/snippetbox/internal/models"
 	_ "github.com/lib/pq"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
 )
 
 type application struct {
-	infoLog  *log.Logger
-	errorLog *log.Logger
-	snippets *models.SnippetModel
+	infoLog       *log.Logger
+	errorLog      *log.Logger
+	snippets      *models.SnippetModel
+	templateCache map[string]*template.Template
 }
 
 func main() {
@@ -31,10 +33,16 @@ func main() {
 	}
 	defer db.Close()
 
+	templateCache, err := newTemplateCache()
+	if err != nil {
+		errorLog.Fatal(err)
+	}
+
 	app := &application{
-		infoLog:  log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime),
-		errorLog: log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile),
-		snippets: &models.SnippetModel{DB: db},
+		infoLog:       log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime),
+		errorLog:      log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile),
+		snippets:      &models.SnippetModel{DB: db},
+		templateCache: templateCache,
 	}
 
 	infoLog.Printf("Starting server on %s", *addr)
