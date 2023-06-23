@@ -4,6 +4,7 @@ import (
 	"github.com/bakigoal/snippetbox/internal/models"
 	"html/template"
 	"path/filepath"
+	"time"
 )
 
 type templateData struct {
@@ -32,7 +33,7 @@ func newTemplateCache() (map[string]*template.Template, error) {
 
 func createTemplate(page string) (*template.Template, error) {
 	// Base template
-	ts, err := template.ParseFiles("./ui/html/base.tmpl.html")
+	ts, err := template.New(page).Funcs(functions).ParseFiles("./ui/html/base.tmpl.html")
 	if err != nil {
 		return nil, err
 	}
@@ -47,4 +48,10 @@ func createTemplate(page string) (*template.Template, error) {
 		return nil, err
 	}
 	return ts, err
+}
+
+var functions = template.FuncMap{
+	"humanDate": func(t time.Time) string {
+		return t.Format("02-01-2006 15:04")
+	},
 }

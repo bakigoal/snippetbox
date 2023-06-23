@@ -9,8 +9,8 @@
     </div>
     <pre><code>{{.Content}}</code></pre>
     <div class="metadata">
-        <time>Created: {{.Created.UTC.Format "2006-01-02 15:04:05"}} UTC</time>
-        <time>Expires: {{.Expires.UTC.Format "2006-01-02 15:04:05"}} UTC</time>
+        <time>Created: {{.Created.Format "2006-01-02 15:04:05"}}</time>
+        <time>Expires: {{.Expires.Format "2006-01-02 15:04:05"}}</time>
     </div>
 </div>
 {{end}}
