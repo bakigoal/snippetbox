@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"flag"
 	"github.com/bakigoal/snippetbox/internal/models"
+	"github.com/go-playground/form/v4"
 	_ "github.com/lib/pq"
 	"html/template"
 	"log"
@@ -16,6 +17,7 @@ type application struct {
 	errorLog      *log.Logger
 	snippets      *models.SnippetModel
 	templateCache map[string]*template.Template
+	formDecoder   *form.Decoder
 }
 
 func main() {
@@ -43,6 +45,7 @@ func main() {
 		errorLog:      log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile),
 		snippets:      &models.SnippetModel{DB: db},
 		templateCache: templateCache,
+		formDecoder:   form.NewDecoder(),
 	}
 
 	infoLog.Printf("Starting server on %s", *addr)
