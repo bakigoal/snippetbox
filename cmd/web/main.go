@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"flag"
+	"github.com/alexedwards/scs/pgxstore"
+	"github.com/alexedwards/scs/v2"
 	"github.com/bakigoal/snippetbox/internal/models"
 	"github.com/go-playground/form/v4"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -10,14 +12,16 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
 type application struct {
-	infoLog       *log.Logger
-	errorLog      *log.Logger
-	snippets      *models.SnippetModel
-	templateCache map[string]*template.Template
-	formDecoder   *form.Decoder
+	infoLog        *log.Logger
+	errorLog       *log.Logger
+	snippets       *models.SnippetModel
+	templateCache  map[string]*template.Template
+	formDecoder    *form.Decoder
+	sessionManager *scs.SessionManager
 }
 
 func main() {
@@ -41,11 +45,12 @@ func main() {
 	}
 
 	app := &application{
-		infoLog:       log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime),
-		errorLog:      log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile),
-		snippets:      &models.SnippetModel{DB: db},
-		templateCache: templateCache,
-		formDecoder:   form.NewDecoder(),
+		infoLog:        log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime),
+		errorLog:       log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile),
+		snippets:       &models.SnippetModel{DB: db},
+		templateCache:  templateCache,
+		formDecoder:    form.NewDecoder(),
+		sessionManager: initSessionManager(db),
 	}
 
 	infoLog.Printf("Starting server on %s", *addr)
@@ -67,4 +72,11 @@ func openDB(dsn string) (*pgxpool.Pool, error) {
 		return nil, err
 	}
 	return conn, nil
+}
+
+func initSessionManager(db *pgxpool.Pool) *scs.SessionManager {
+	sessionManager := scs.New()
+	sessionManager.Store = pgxstore.New(db)
+	sessionManager.Lifetime = 12 * time.Hour
+	return sessionManager
 }
