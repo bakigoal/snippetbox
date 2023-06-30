@@ -1,11 +1,11 @@
 package main
 
 import (
-	"database/sql"
+	"context"
 	"flag"
 	"github.com/bakigoal/snippetbox/internal/models"
 	"github.com/go-playground/form/v4"
-	_ "github.com/lib/pq"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"html/template"
 	"log"
 	"net/http"
@@ -58,13 +58,13 @@ func main() {
 	errorLog.Fatal(err)
 }
 
-func openDB(dsn string) (*sql.DB, error) {
-	db, err := sql.Open("postgres", dsn)
+func openDB(dsn string) (*pgxpool.Pool, error) {
+	conn, err := pgxpool.New(context.Background(), dsn)
 	if err != nil {
 		return nil, err
 	}
-	if err = db.Ping(); err != nil {
+	if err = conn.Ping(context.Background()); err != nil {
 		return nil, err
 	}
-	return db, nil
+	return conn, nil
 }
