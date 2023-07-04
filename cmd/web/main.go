@@ -68,6 +68,8 @@ func main() {
 func getTlsConfig() *tls.Config {
 	return &tls.Config{
 		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
+		MinVersion:       tls.VersionTLS12,
+		MaxVersion:       tls.VersionTLS12,
 	}
 }
 
