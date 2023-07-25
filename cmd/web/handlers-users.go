@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"github.com/bakigoal/snippetbox/internal/models"
 	"github.com/bakigoal/snippetbox/internal/validator"
 	"net/http"
@@ -129,5 +128,16 @@ func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) userLogoutPost(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Logout the user...")
+	// Change session ID again
+	err := app.sessionManager.RenewToken(r.Context())
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+	// Remove authenticatedUserID from session
+	app.sessionManager.Remove(r.Context(), "authenticatedUserID")
+	// Add flash message
+	app.sessionManager.Put(r.Context(), "flash", "You've been logged out successfully!")
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
